@@ -10,7 +10,7 @@ from esap import errors
 from esap import storage
 
 ENDPOINT_BASE = 'https://api.esa.io/'
-REDIRECT_URI_OOB = 'urn:ietf:wg:oauth:2.0:oob'
+OOB_CALLBACK_URN = 'urn:ietf:wg:oauth:2.0:oob'
 
 
 def _secure_storage_factory():
@@ -38,7 +38,7 @@ class EsaClient(object):
   def _build_authorize_uri(self):
     params = {
         'client_id': self.client_id,
-        'redirect_uri': REDIRECT_URI_OOB,
+        'redirect_uri': OOB_CALLBACK_URN,
         'response_type': 'code',
         'scope': 'read write',
     }
@@ -48,8 +48,10 @@ class EsaClient(object):
   def _authorize(self):
     authorize_uri = self._build_authorize_uri()
     print('Please open the following URL in your browser:')
-    print(authorize_uri)
-    authorization_code = getpass.getpass('Enter the code: ')
+    print()
+    print(f'    {authorize_uri}')
+    print()
+    authorization_code = getpass.getpass('Enter the code: ').strip()
     return authorization_code
 
   def _fetch_access_token(self, authorization_code: str):
@@ -58,7 +60,7 @@ class EsaClient(object):
         'client_secret': self.client_secret,
         'code': authorization_code,
         'grant_type': 'authorization_code',
-        'redirect_uri': REDIRECT_URI_OOB,
+        'redirect_uri': OOB_CALLBACK_URN,
     }
     response = self.post_request('oauth/token', body=params)
     return response['access_token']
