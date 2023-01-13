@@ -42,7 +42,7 @@ class AudioRenderer(BaseRenderer):
 
   def render(self, file: resources.File, url: str) -> str:
     audio = html.Element('audio')
-    audio.set('controls', 'controls')
+    audio.set('controls')
     audio.set('alt', file.name)
     audio.set('src', url)
     return _html_element_to_string(audio)
@@ -55,7 +55,7 @@ class VideoRenderer(BaseRenderer):
 
   def render(self, file: resources.File, url: str) -> str:
     video = html.Element('video')
-    video.set('controls', 'controls')
+    video.set('controls')
     video.set('alt', file.name)
     video.set('src', url)
     return _html_element_to_string(video)
