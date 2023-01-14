@@ -22,7 +22,7 @@ class EsaClient(object):
 
   def __init__(self):
     self.secure_storage = _secure_storage_factory()
-    self.client_id = env.Environment
+    self.client_id = env.Environment.client_id
     self.client_secret = self.secure_storage.get('client_secret')
     if not self._validate_access_token():
       authorization_code = self._authorize()
@@ -30,7 +30,7 @@ class EsaClient(object):
       self.secure_storage.set('access_token', access_token)
 
   def _build_uri(self, endpoint: str, query_params: Union[dict, None] = None):
-    uri = endpoint
+    uri = ENDPOINT_BASE + endpoint
     if query_params:
       uri += '?' + urllib.parse.urlencode(query_params)
     return uri
