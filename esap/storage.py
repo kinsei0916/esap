@@ -88,7 +88,8 @@ class LocalFileStorage(BaseStorage):
     os.makedirs(os.path.dirname(self.path), exist_ok=True)
     with open(self.path, 'w', encoding='utf-8', opener=self._get_opener()) as f:
       for key, value in data.items():
-        f.write(f'{key}={value}\n')
+        if value is not None:
+          f.write(f'{key}={value}\n')
 
   def _append(self, key: str, value: str):
     assert not self.secure
