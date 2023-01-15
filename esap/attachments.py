@@ -38,7 +38,7 @@ def _encode_multipart_form_fata(fields: dict[str, Union[str, resources.File]]):
   for key, value in fields.items():
     lines.append(f'--{BOUNDARY}')
     if isinstance(value, resources.File):
-      lines.append(f'Content-Disposition: form-data; name="{key}";'  # space
+      lines.append(f'Content-Disposition: form-data; name="{key}"; '
                    f'filename="{value.name}"')
       lines.append(f'Content-Type: {value.mimetype}')
       lines.append('')
