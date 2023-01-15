@@ -1,5 +1,4 @@
 import json
-import re
 from typing import Union
 import urllib.parse
 
@@ -11,6 +10,7 @@ from esap import resources
 from esap import storage
 from esap.client import EsaClient
 from esap.markdown import embedding
+from esap.markdown import table
 
 CACHE_STORAGE = storage.LocalFileStorage('~/.esap/attachments_cache')
 
@@ -106,17 +106,6 @@ def upload_attachment(client: EsaClient,
   return resource_url
 
 
-def _minify_markdown(md: str) -> str:
-  md = re.sub(r'\| *', '| ', md)
-  md = re.sub(r' *\|', ' |', md)
-  md = re.sub(r' *\|', ' |', md)
-  lines = md.splitlines()
-  lines = [line.strip() for line in lines]
-  lines[1] = re.sub(r'-+', '--------', lines[1])
-  md = '\n'.join(lines)
-  return md
-
-
 def upload_and_render_table(client: EsaClient,
                             team_name: str,
                             df: pd.DataFrame,
@@ -134,6 +123,6 @@ def upload_and_render_table(client: EsaClient,
   md = df.to_markdown()
 
   if minify_markdown:
-    md = _minify_markdown(md)
+    md = table.minify_markdown_table(md)
 
   return md
