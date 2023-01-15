@@ -59,6 +59,3 @@ venv.bak/
 
 # pytype static type analyzer
 .pytype/
-
-# Secrets
-env.py

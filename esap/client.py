@@ -5,7 +5,6 @@ import urllib.parse
 
 import httplib2
 
-from esap import env
 from esap import errors
 from esap import oauth2
 from esap import storage
@@ -25,15 +24,8 @@ def _credentials_storage_factory():
 class EsaClient(object):
 
   def __init__(self):
-    self.client_secrets_storage = _client_secrets_storage_factory()
-    self.credentials_storage = _credentials_storage_factory()
-    client_id = env.Environment.client_id
-    client_secret = self.client_secrets_storage.get('client_secret')
-    if client_secret is None:
-      raise errors.AuthenticationError('`client_secret` is not found')
-    self.oauth_client = oauth2.OAuth2Client(client_id,
-                                            client_secret,
-                                            self.credentials_storage,
+    self.oauth_client = oauth2.OAuth2Client(_client_secrets_storage_factory(),
+                                            _credentials_storage_factory(),
                                             scope=['read', 'write'])
     if not self._validate_access_token():
       self._authorize()
