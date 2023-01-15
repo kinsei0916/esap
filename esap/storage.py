@@ -16,6 +16,14 @@ class BaseStorage(abc.ABC):
   def delete(self, key: str):
     pass
 
+  @abc.abstractmethod
+  def set_from_dict(self, data: dict[str, str]):
+    pass
+
+  @abc.abstractmethod
+  def to_dict(self) -> dict[str, str]:
+    pass
+
 
 class LocalFileStorage(BaseStorage):
 
@@ -38,6 +46,13 @@ class LocalFileStorage(BaseStorage):
   def delete(self, key: str):
     del self.data[key]
     self._write(self.data)
+
+  def set_from_dict(self, data: dict[str, str]):
+    self.data = dict(data)
+    self._write(self.data)
+
+  def to_dict(self) -> dict[str, str]:
+    return dict(self.data)
 
   def _get_opener(self):
     if not self.secure:
@@ -84,8 +99,8 @@ class LocalFileStorage(BaseStorage):
 
 class InMemoryStorage(BaseStorage):
 
-  def __init__(self):
-    self.data = {}
+  def __init__(self, initial_data: dict[str, str] = {}):
+    self.data = initial_data
 
   def get(self, key: str):
     return self.data.get(key)
@@ -95,3 +110,9 @@ class InMemoryStorage(BaseStorage):
 
   def delete(self, key: str):
     del self.data[key]
+
+  def set_from_dict(self, data: dict[str, str]):
+    self.data = dict(data)
+
+  def to_dict(self) -> dict[str, str]:
+    return dict(self.data)

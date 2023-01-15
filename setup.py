@@ -17,6 +17,7 @@ packages = ['esap']
 install_requires = [
     'httplib2>=0.15.0,<1dev',
     'lxml>=4.0.0,<5',
+    'oauthlib>=3.0.0<4'
     'pandas>=1.3.0,<2',
     'tabulate>=0.8.10,<1',
 ]

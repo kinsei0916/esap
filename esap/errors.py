@@ -3,7 +3,6 @@ import json
 
 class Error(Exception):
   """Base error for this module."""
-
   pass
 
 
@@ -13,10 +12,10 @@ class HttpError(Error):
   def __init__(self, response, content, uri=None):
     self.response = response
     if not isinstance(content, bytes):
-      raise TypeError("HTTP content should be bytes")
+      raise TypeError('HTTP content should be bytes')
     self.content = content
     self.uri = uri
-    self.error_details = ""
+    self.error_details = ''
     self.reason = self._get_reason()
 
   @property
@@ -29,16 +28,16 @@ class HttpError(Error):
     reason = self.response.reason
     try:
       try:
-        data = json.loads(self.content.decode("utf-8"))
+        data = json.loads(self.content.decode('utf-8'))
       except json.JSONDecodeError:
         # In case it is not json
-        data = self.content.decode("utf-8")
+        data = self.content.decode('utf-8')
       if isinstance(data, dict):
-        reason = data["error"]
-        if "error_description" in data:
-          self.error_details = data["error_description"]
-        elif "message" in data:
-          self.error_details = data["message"]
+        reason = data['error']
+        if 'error_description' in data:
+          self.error_details = data['error_description']
+        elif 'message' in data:
+          self.error_details = data['message']
         else:
           self.error_details = data
       else:
@@ -46,7 +45,7 @@ class HttpError(Error):
     except (ValueError, KeyError, TypeError):
       pass
     if reason is None:
-      reason = ""
+      reason = ''
     return reason.strip()
 
   def __repr__(self):
@@ -65,5 +64,17 @@ class HttpError(Error):
       )
     else:
       return '<HttpError %s "%s">' % (self.response.status, self.reason)
+
+  __str__ = __repr__
+
+
+class AuthenticationError(Error):
+  """General authentication error."""
+
+  def __init__(self, reason: str):
+    self.reason = reason
+
+  def __repr__(self):
+    return f'<AuthenticationError {self.reason}>'
 
   __str__ = __repr__
