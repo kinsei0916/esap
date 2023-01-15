@@ -12,8 +12,8 @@ ENDPOINT_BASE = 'https://api.esa.io/'
 
 class EsaClient(object):
 
-  def __init__(self):
-    self.auth = auth.Auth()
+  def __init__(self, options: Union[auth.AuthOptions, None] = None):
+    self.auth = auth.Auth(options)
     self.auth.authorize()
 
   def _build_uri(self, endpoint: str, query_params: Union[dict, None] = None):
