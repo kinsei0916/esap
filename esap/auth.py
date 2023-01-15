@@ -88,6 +88,7 @@ class Auth(object):
     if self.client.access_token is None:
       self._get_authorization_code()
       self._fetch_access_token()
+      print('Authorization succeeded!')
 
   def add_token(
       self,
