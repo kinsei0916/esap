@@ -59,7 +59,7 @@ class Auth(object):
   def _send_auth_request(self, uri: str, headers=None, body=None):
     http = httplib2.Http()
     response, content = http.request(uri, 'POST', body=body, headers=headers)
-    if response.status >= 300:
+    if response.status != 200:
       raise errors.HttpError(response, content, uri=uri)
     return content
 
