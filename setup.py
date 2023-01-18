@@ -3,8 +3,8 @@ from __future__ import print_function
 
 import sys
 
-if sys.version_info < (3, 7):
-  print('esap requires python3 version >= 3.7.', file=sys.stderr)
+if sys.version_info < (3, 8):
+  print('esap requires python3 version >= 3.8.', file=sys.stderr)
   sys.exit(1)
 
 import io
@@ -45,13 +45,12 @@ setup(
     author_email='kinsei0916@gmail.com',
     url='https://github.com/kon72/esap/',
     install_requires=install_requires,
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     packages=packages,
     license='Apache 2.0',
     keywords='esa api client',
     classifiers=[
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
