@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import getpass
 from typing import Literal, Union
