@@ -97,7 +97,7 @@ def upload_attachment(client: EsaClient,
   if isinstance(file, str):
     file = resources.File(file)
 
-  cache_key = f'{team_name}_{file.hash()}'
+  cache_key = f'{team_name}:{file.name}:{file.hash()}'
   cached_url = CACHE_STORAGE.get(cache_key)
   if cached_url and not force_upload:
     return cached_url
