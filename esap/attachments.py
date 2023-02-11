@@ -113,12 +113,11 @@ def upload_and_render_table(client: EsaClient,
                             df: pd.DataFrame,
                             force_upload=False,
                             minify_markdown=True) -> str:
-  renderer = embedding.Renderer()
 
   def render_if_file(value):
     if isinstance(value, resources.File):
       url = upload_attachment(client, team_name, value, force_upload)
-      return renderer.render(value, url)
+      return embedding.render(value, url)
     return value
 
   df = df.applymap(render_if_file)

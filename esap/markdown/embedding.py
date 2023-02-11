@@ -73,18 +73,16 @@ class DefaultRenderer(BaseRenderer):
     return _html_element_to_string(a)
 
 
-class Renderer:
+_RENDERING_HANDLERS = [
+    ImageRenderer(),
+    AudioRenderer(),
+    VideoRenderer(),
+    DefaultRenderer(),
+]
 
-  def __init__(self):
-    self._renderers = [
-        ImageRenderer(),
-        AudioRenderer(),
-        VideoRenderer(),
-        DefaultRenderer(),
-    ]
 
-  def render(self, file: resources.File, url: str) -> str:
-    for renderer in self._renderers:
-      if renderer.can_handle(file.mimetype):
-        return renderer.render(file, url)
-    raise RuntimeError(f'No renderer found for file: {file}')
+def render(file: resources.File, url: str) -> str:
+  for renderer in _RENDERING_HANDLERS:
+    if renderer.can_handle(file.mimetype):
+      return renderer.render(file, url)
+  raise RuntimeError(f'No renderer found for file: {file}')
