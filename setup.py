@@ -20,6 +20,7 @@ install_requires = [
     'oauthlib>=3.0.0,<4',
     'pandas>=1.3.0,<2',
     'tabulate>=0.8.10,<1',
+    'tqdm>=4.0.0,<5',
 ]
 
 package_root = os.path.abspath(os.path.dirname(__file__))

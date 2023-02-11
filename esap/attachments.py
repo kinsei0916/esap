@@ -6,6 +6,7 @@ import urllib.parse
 
 import httplib2
 import pandas as pd
+import tqdm
 
 from esap import errors
 from esap import resources
@@ -113,14 +114,25 @@ def upload_and_render_table(client: EsaClient,
                             df: pd.DataFrame,
                             force_upload=False,
                             minify_markdown=True) -> str:
+  num_files = 0
+  for _, row in df.iterrows():
+    for _, value in row.items():
+      if isinstance(value, resources.File):
+        num_files += 1
 
-  def render_if_file(value):
-    if isinstance(value, resources.File):
-      url = upload_attachment(client, team_name, value, force_upload)
-      return embedding.render(value, url)
-    return value
+  if num_files > 0:
+    with tqdm.tqdm(total=num_files) as pbar:
 
-  df = df.applymap(render_if_file)
+      def render_if_file(value):
+        if not isinstance(value, resources.File):
+          return value
+        pbar.set_description(f'Uploading {value.name}')
+        url = upload_attachment(client, team_name, value, force_upload)
+        pbar.update(1)
+        return embedding.render(value, url)
+
+      df = df.applymap(render_if_file)
+
   md = df.to_markdown()
 
   if minify_markdown:
