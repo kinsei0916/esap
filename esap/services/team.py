@@ -11,26 +11,12 @@ import tqdm
 from esap import errors
 from esap import resources
 from esap import storage
-from esap.client import EsaClient
+from esap.base import BaseClient
 from esap.markdown import embedding
 from esap.markdown import table
+from esap.services import base
 
 CACHE_STORAGE = storage.LocalFileStorage('~/.esap/attachments_cache')
-
-
-def _fetch_attachment_policies(client: EsaClient, team_name: str,
-                               file: resources.File):
-  params = {
-      'type': file.mimetype,
-      'name': file.name,
-      'size': file.size,
-  }
-  response = client.post_request(
-      f'v1/teams/{team_name}/attachments/policies',
-      body=params,
-  )
-  return response
-
 
 BOUNDARY = '-------314159265358979323846'
 CRLF = b'\r\n'
@@ -91,51 +77,66 @@ def _do_upload_attachment(policies: dict, file: resources.File) -> str:
   return urllib.parse.unquote(response['location'], encoding='utf-8')
 
 
-def upload_attachment(client: EsaClient,
-                      team_name: str,
-                      file: Union[str, resources.File],
-                      force_upload=False) -> str:
-  if isinstance(file, str):
-    file = resources.File(file)
+class TeamService(base.Service):
 
-  cache_key = f'{team_name}:{file.name}:{file.hash()}'
-  cached_url = CACHE_STORAGE.get(cache_key)
-  if cached_url and not force_upload:
-    return cached_url
+  def __init__(self, client: BaseClient, team_name: str):
+    super(TeamService, self).__init__(client)
+    self.team_name = team_name
 
-  policies = _fetch_attachment_policies(client, team_name, file)
-  resource_url = _do_upload_attachment(policies, file)
-  CACHE_STORAGE.set(cache_key, resource_url)
-  return resource_url
+  def upload_attachment(self,
+                        file: Union[str, resources.File],
+                        force_upload=False) -> str:
+    if isinstance(file, str):
+      file = resources.File(file)
 
+    cache_key = f'{self.team_name}:{file.name}:{file.hash()}'
+    cached_url = CACHE_STORAGE.get(cache_key)
+    if cached_url and not force_upload:
+      return cached_url
 
-def upload_and_render_table(client: EsaClient,
-                            team_name: str,
-                            df: pd.DataFrame,
-                            force_upload=False,
-                            minify_markdown=True) -> str:
-  num_files = 0
-  for _, row in df.iterrows():
-    for _, value in row.items():
-      if isinstance(value, resources.File):
-        num_files += 1
+    policies = self._fetch_attachment_policies(file)
+    resource_url = _do_upload_attachment(policies, file)
+    CACHE_STORAGE.set(cache_key, resource_url)
+    return resource_url
 
-  if num_files > 0:
-    with tqdm.tqdm(total=num_files) as pbar:
+  def upload_and_render_table(self,
+                              df: pd.DataFrame,
+                              force_upload=False,
+                              minify_markdown=True) -> str:
+    num_files = 0
+    for _, row in df.iterrows():
+      for _, value in row.items():
+        if isinstance(value, resources.File):
+          num_files += 1
 
-      def render_if_file(value):
-        if not isinstance(value, resources.File):
-          return value
-        pbar.set_description(f'Uploading {value.name}')
-        url = upload_attachment(client, team_name, value, force_upload)
-        pbar.update(1)
-        return embedding.render(value, url)
+    if num_files > 0:
+      with tqdm.tqdm(total=num_files) as pbar:
 
-      df = df.applymap(render_if_file)
+        def render_if_file(value):
+          if not isinstance(value, resources.File):
+            return value
+          pbar.set_description(f'Uploading {value.name}')
+          url = self.upload_attachment(value, force_upload)
+          pbar.update(1)
+          return embedding.render(value, url)
 
-  md = df.to_markdown()
+        df = df.applymap(render_if_file)
 
-  if minify_markdown:
-    md = table.minify_markdown_table(md)
+    md = df.to_markdown()
 
-  return md
+    if minify_markdown:
+      md = table.minify_markdown_table(md)
+
+    return md
+
+  def _fetch_attachment_policies(self, file: resources.File):
+    params = {
+        'type': file.mimetype,
+        'name': file.name,
+        'size': file.size,
+    }
+    response = self.client.post_request(
+        f'v1/teams/{self.team_name}/attachments/policies',
+        body=params,
+    )
+    return response

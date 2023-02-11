@@ -5,16 +5,21 @@ import urllib.parse
 import httplib2
 
 from esap import auth
+from esap import base
 from esap import errors
+from esap.services import team
 
 ENDPOINT_BASE = 'https://api.esa.io/'
 
 
-class EsaClient(object):
+class EsaClient(base.BaseClient):
 
   def __init__(self, options: Union[auth.AuthOptions, None] = None):
     self.auth = auth.Auth(options)
     self.auth.authorize()
+
+  def team_service(self, team_name: str):
+    return team.TeamService(self, team_name)
 
   def _build_uri(self, endpoint: str, query_params: Union[dict, None] = None):
     uri = ENDPOINT_BASE + endpoint
